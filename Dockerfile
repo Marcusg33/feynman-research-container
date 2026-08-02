@@ -11,6 +11,15 @@ FROM node:22.23.2-bookworm-slim
 ARG FEYNMAN_VERSION=0.3.10
 ARG PI_VERSION=0.83.0
 
+# Default model, baked into the image so a fresh install starts on a
+# good-value model instead of an expensive one.
+#
+# Must be an ID that appears in `feynman model list` — Pi ships a curated
+# OpenRouter catalogue that lags OpenRouter's live list, so some real
+# OpenRouter IDs (e.g. deepseek-v4-pro, deepseek-v4-flash-0731) are rejected
+# with "Model not available in Pi auth storage".
+ARG DEFAULT_MODEL=openrouter/deepseek/deepseek-v4-flash
+
 # UID/GID of the user that owns ./workspace on the host. Must match, or the
 # non-root user inside the container cannot write to the bind mount.
 ARG USER_UID=1000
@@ -84,6 +93,20 @@ RUN FEYNMAN_INSTALL_SKIP_PATH_UPDATE=1 \
 # Fail the build rather than shipping an image where either binary is missing
 # from a fresh shell's PATH.
 RUN pi --version && feynman --version
+
+# Bake the default model into the image's ~/.feynman/agent/settings.json.
+# Docker seeds an empty named volume from the image, so a first-time user gets
+# this default; an EXISTING feynman-config volume keeps whatever it already has
+# and is not affected by a rebuild (change it with `feynman model set`).
+#
+# `model set` validates against the authenticated model list, which requires an
+# OpenRouter key to be present. There is no key at build time, so a throwaway
+# placeholder is supplied for this step only. It is never used for a request
+# and is not persisted anywhere — the real key arrives via the environment at
+# run time.
+RUN OPENROUTER_API_KEY=placeholder-build-time-only \
+    feynman model set "${DEFAULT_MODEL}" \
+    && grep -q defaultModel /home/agent/.feynman/agent/settings.json
 
 WORKDIR /home/agent/workspace
 

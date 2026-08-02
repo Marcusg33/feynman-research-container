@@ -310,7 +310,7 @@ by 50x or more** for identical work. This is the single most important setting.
 Set one like this:
 
 ```bash
-docker compose run --rm --entrypoint feynman pi-feynman model set openrouter/deepseek/deepseek-v4-flash-0731
+docker compose run --rm --entrypoint feynman pi-feynman model set openrouter/deepseek/deepseek-v4-flash
 ```
 
 The setting persists across restarts. Check the current one with
@@ -332,19 +332,29 @@ measured run of this container, which came to $0.80 against a $0.90 estimate.
 *"Index"* is the [Artificial Analysis Intelligence Index](https://artificialanalysis.ai/leaderboards/models),
 a composite benchmark score. Blank means not separately published.
 
+Every ID below is verified to be accepted by `feynman model set`.
+
 | # | Model | Index | Cost per review | Why |
 |---|---|---|---|---|
-| **1** | `deepseek/deepseek-v4-flash-0731` | **50** | **~$0.02** | The standout. Near-top-tier benchmark scores at roughly 1/45th the cost of Claude Sonnet, with a 1M-token context window. Hard to justify anything else as a daily driver. |
+| **1** | `deepseek/deepseek-v4-flash` | **50** | **~$0.03** | The standout, and this container's default. Near-top-tier benchmark scores at roughly 1/30th the cost of Claude Sonnet, with a 1M-token context window. Hard to justify anything else as a daily driver. |
 | **2** | `z-ai/glm-5.2` | **51** | ~$0.11 | Highest-scoring open-weight model on the index. Still under a fifth of frontier pricing, 1M context. Pick this when Flash struggles. |
-| **3** | `deepseek/deepseek-v4-pro` | 44 | ~$0.10 | Independently found to match GPT-5.5 and Claude Opus 4.7 on most agentic benchmarks at 10–13x lower cost per output token. |
-| **4** | `moonshotai/kimi-k2.5` | 47 | ~$0.17 | Strong reasoning; the Kimi family leads published *research*-specific benchmarks. |
+| **3** | `moonshotai/kimi-k2.5` | 47 | ~$0.17 | Strong reasoning; the Kimi family leads published *research*-specific benchmarks. |
+| **4** | `z-ai/glm-4.7` | — | ~$0.12 | Solid mid-tier all-rounder. |
 | **5** | `google/gemini-3.1-flash-lite` | — | ~$0.08 | 1M context, very fast, from a major vendor. Good for bulk searching and triage. |
 | **6** | `qwen/qwen3.7-flash` | — | ~$0.01 | The cheapest thing here that is still genuinely usable. For high-volume, low-stakes summarising. |
 | **7** | `x-ai/grok-4.3` | — | ~$0.30 | 1M context. A reasonable step up when you want more headroom but not frontier pricing. |
 
-**Recommended starting point: `deepseek/deepseek-v4-flash-0731`.** If a
-particular task comes out weak, move up the list rather than jumping straight
-to the premium tier.
+**This container already defaults to `deepseek/deepseek-v4-flash`** — you do not
+need to do anything to get it. If a particular task comes out weak, move up the
+list rather than jumping straight to the premium tier.
+
+> **Some real OpenRouter model IDs will be rejected.** Pi ships a curated
+> catalogue that lags OpenRouter's live list, so IDs such as
+> `deepseek-v4-pro`, `deepseek-v4-flash-0731` and `gemini-3.1-pro-preview`
+> fail with *"Model not available in Pi auth storage"* even though OpenRouter
+> serves them. Run `feynman model list` to see what is actually accepted.
+> Note that DeepSeek V4 Flash scores **higher** than V4 Pro on the intelligence
+> index (50 vs 44) and costs less, so this is rarely a real loss.
 
 ### The premium tier — and why it usually isn't worth it
 
@@ -354,14 +364,13 @@ indistinguishable on research tasks.
 
 | Model | Index | Cost per review |
 |---|---|---|
-| `google/gemini-3.1-pro-preview` | 46.5 | ~$0.64 |
 | `anthropic/claude-sonnet-4.5` | — | ~$0.90 |
 | `anthropic/claude-opus-5` | 60.7 | ~$1.50 |
 | `openai/gpt-5.5` | — | ~$1.60 |
 
 Claude Opus 5 does top the overall intelligence index — but at ~$1.50 per
-review against ~$0.02, you can run **seventy-five** DeepSeek V4 Flash reviews
-for the price of one. For literature searching, summarising and comparison,
+review against ~$0.03, you can run **fifty** DeepSeek V4 Flash reviews for the
+price of one. For literature searching, summarising and comparison,
 that trade is very rarely worth making. Reserve the premium tier for final
 drafting of something that matters, if at all.
 

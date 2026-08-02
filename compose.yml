@@ -42,6 +42,9 @@ services:
         # (or with `--build-arg`) to test a different release.
         FEYNMAN_VERSION: "0.3.10"
         PI_VERSION: "0.83.0"
+        # Model a fresh install starts on. Applies to new setups only — an
+        # existing feynman-config volume keeps its current setting.
+        DEFAULT_MODEL: "openrouter/deepseek/deepseek-v4-flash"
         # Must match the uid/gid that owns ./workspace on the host, otherwise
         # the non-root `agent` user cannot write to the bind mount.
         USER_UID: "1000"

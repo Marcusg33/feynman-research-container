@@ -102,12 +102,26 @@ docker compose run --rm --entrypoint bash pi-feynman -c \
 To change the default model:
 
 ```bash
-docker compose run --rm --entrypoint feynman pi-feynman model set openrouter/deepseek/deepseek-v4-flash-0731
+docker compose run --rm --entrypoint feynman pi-feynman model set openrouter/deepseek/deepseek-v4-flash
 ```
 
-Note that `feynman model list` reflects Feynman's curated catalogue, not the
-full set of usable IDs — DeepSeek models are absent from it but work fine when
-set explicitly, since auth and routing both go through OpenRouter.
+The default model is baked into the image at build time via the
+`DEFAULT_MODEL` build arg (`openrouter/deepseek/deepseek-v4-flash`). Because
+Docker seeds a named volume from the image only when that volume is empty, this
+applies to **fresh installs only** — an existing `feynman-config` volume keeps
+whatever it already had, and rebuilding will not change it. Use
+`feynman model set` for those.
+
+`model set` validates against the authenticated model list, which needs an
+OpenRouter key present. There is none at build time, so the Dockerfile supplies
+a throwaway placeholder for that one step; it is never used for a request.
+
+**Pi's OpenRouter catalogue lags OpenRouter's live model list.** `feynman model
+set` rejects IDs that are absent from it with *"Model not available in Pi auth
+storage"*, even when OpenRouter serves them. Verified rejected at 0.3.10:
+`deepseek/deepseek-v4-pro`, `deepseek/deepseek-v4-flash-0731`,
+`google/gemini-3.1-pro-preview`. `deepseek/deepseek-v4-flash` is accepted.
+`pi update --models` reports a timeout in-container and does not add them.
 
 ### Troubleshooting
 
