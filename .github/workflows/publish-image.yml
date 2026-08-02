@@ -10,13 +10,14 @@ name: Publish container image
 on:
   push:
     branches: [main]
+    # Version tags produce the semver tags below. Publishing a release from a
+    # tag is deliberately NOT a separate trigger — the tag push already covers
+    # it, and having both fires two identical builds for one release.
     tags: ["v*"]
     # Documentation-only changes do not change the image.
     paths-ignore:
       - "**.md"
       - "docs/**"
-  release:
-    types: [published]
   workflow_dispatch:
 
 env:
