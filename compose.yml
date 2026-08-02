@@ -1,0 +1,80 @@
+# Shared bits between the main service and the one-off alphaXiv login service,
+# so the two can never drift out of sync on volumes or environment.
+x-common: &common
+  image: pi-feynman:local
+  environment: &common-env
+    # Simplest auth path for a container: pass the key in directly.
+    # Set this in a local .env file (not committed to git) or export it
+    # in your shell before running `docker compose run`.
+    OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY in .env}
+    # Required for Pi's terminal UI to render correctly inside a container.
+    # Without these, colors, cursor control, and Unicode box-drawing
+    # characters can silently degrade or break.
+    TERM: xterm-256color
+    COLORTERM: truecolor
+    LANG: C.UTF-8
+  volumes: &common-volumes
+    # Your actual project — the only thing the agent can read/write
+    # besides its own config.
+    - ./workspace:/home/agent/workspace
+    # Feynman's Pi config root. This is where auth.json, settings.json,
+    # models.json, sessions/, memory/ and the npm-global package tree live.
+    # NOT ~/.pi — Feynman runs Pi with its own isolated config root.
+    - feynman-config:/home/agent/.feynman
+    # alphaXiv ("Alpha Hub") stores its auth token here, outside ~/.feynman.
+    # Without this volume the login does not survive a restart.
+    - ahub-config:/home/agent/.ahub
+    # Only used if you run bare `pi` rather than `feynman`. Cheap to keep.
+    - pi-config:/home/agent/.pi
+    # NOTE: ~/.local/share/feynman is deliberately NOT a volume. That is the
+    # Feynman *application install* directory (versioned bundle dirs), not
+    # data. Mounting a named volume there would shadow the freshly-built
+    # bundle on rebuild, leaving the ~/.local/bin/feynman shim pointing at a
+    # bundle path that only exists in the image, not the volume.
+
+services:
+  pi-feynman:
+    <<: *common
+    build:
+      context: .
+      args:
+        # Keep these in sync with the defaults in the Dockerfile. Override here
+        # (or with `--build-arg`) to test a different release.
+        FEYNMAN_VERSION: "0.3.10"
+        PI_VERSION: "0.83.0"
+        # Must match the uid/gid that owns ./workspace on the host, otherwise
+        # the non-root `agent` user cannot write to the bind mount.
+        USER_UID: "1000"
+        USER_GID: "1000"
+    container_name: pi-feynman
+    stdin_open: true   # keep STDIN open for interactive `pi` sessions
+    tty: true          # allocate a pseudo-TTY so the terminal UI renders
+
+  # One-off service used ONLY for `feynman alpha login`.
+  #
+  # Why it exists: alpha login starts an OAuth callback listener bound to
+  # 127.0.0.1:9876 *inside the container*, and hands alphaXiv a redirect_uri of
+  # http://127.0.0.1:9876/callback. Your host browser resolves that to the
+  # HOST's loopback, which has nothing listening. Publishing the port with
+  # `-p 9876:9876` does not help either: Docker forwards published ports to the
+  # container's eth0 address, never to its loopback interface.
+  #
+  # Sharing the host network namespace makes the container's 127.0.0.1 and the
+  # host's 127.0.0.1 the same interface, so the browser redirect lands on the
+  # listener. This is the only command that needs it — the research container
+  # itself stays on the default bridge network.
+  #
+  # Run it as:
+  #   docker compose run --rm alphaxiv-login
+  alphaxiv-login:
+    <<: *common
+    profiles: ["login"]   # excluded from `docker compose up`; run explicitly
+    network_mode: host
+    stdin_open: true
+    tty: true
+    entrypoint: ["feynman", "alpha", "login"]
+
+volumes:
+  feynman-config:
+  ahub-config:
+  pi-config:

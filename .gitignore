@@ -1,0 +1,10 @@
+# Real API keys live here. Never commit.
+.env
+
+# Agent working directory — research inputs/outputs, not source.
+workspace/*
+!workspace/.gitkeep
+!workspace/README.md
+
+# Internal build notes, not part of the published container.
+plan.md
