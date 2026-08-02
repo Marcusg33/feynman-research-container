@@ -72,17 +72,24 @@ open) — you will put it into a file in the next step of the
 |---|---|
 | A one-line test question | less than $0.001 |
 | Searching alphaXiv for papers | $0 (no AI model involved) |
-| Narrow literature review, on a **good-value** model | **~$0.02** |
-| Narrow literature review, on a **premium** model | **~$0.80** (measured) |
+| Narrow literature review, on a **good-value** model | **~$0.01** |
+| Narrow literature review, on a **premium** model | **~$0.40–0.80** |
 | A full `deepresearch` across dozens of sources | dollars, not cents |
 
 Note the gap between the middle two rows: **that is the same piece of work.**
 The only difference is which model ran it.
 
+Real costs are usually lower than published per-token prices suggest, because
+repeated content is cached at a large discount. One long session is cheaper
+than several short ones covering the same ground.
+
+Always check what you are actually spending at
+<https://openrouter.ai/activity>.
+
 The big cost driver is the **model**, not the container — the choice can change
 your bill by 50x. Before running anything substantial, read
-**[Best value models](../README.md#best-value-models--as-of-2-august-2026)** in
-the main README and set one. It takes a single command, and it is the
+**[Models and costs](models-and-costs.md)**. The container already defaults to
+a good-value model, so usually there is nothing to do — but it is the
 difference between $10 lasting a week and lasting most of a year.
 
 Check your spending any time at <https://openrouter.ai/activity>.

@@ -196,9 +196,37 @@ Result:
 - Content was substantive and cited real arXiv IDs (e.g. 2409.14507,
   "A is for Absorption", which is a genuine paper on this topic).
 - **Cost: $0.80**, measured as the delta in OpenRouter's `usage` field before
-  and after. Note this was a *partial* run — it was stopped early once the
-  output file proved the mount worked, so a completed narrow review would cost
-  somewhat more.
+  and after, on `openrouter/anthropic/claude-sonnet-4.5`. This was a *partial*
+  run — stopped early once the output file proved the mount worked.
+
+**Do not read $0.80 as representative.** It is a premium model on a single
+short session, which is close to the worst case on both axes. The same shape of
+task on DeepSeek V4 has been measured at under **$0.01** with a >90% cache hit
+rate. Two separate factors drive that gap:
+
+- **Model price.** Sonnet 4.5 is $3/$15 per million against DeepSeek V4 Flash's
+  $0.14/$0.28 — roughly 7x on input and 17x on output before anything else.
+- **Prompt caching.** Cached input reads cost about a tenth of normal. Long
+  sessions amortise the system prompt, tool definitions and paper text across
+  many turns; a short run barely benefits.
+
+On caching specifically, verified by reading `pi-ai`'s
+`dist/api/openai-completions.js` at Pi 0.83.0:
+
+```js
+const cacheControlFormat =
+  provider === "openrouter" && model.id.startsWith("anthropic/") ? "anthropic" : undefined;
+```
+
+So Pi **does** emit Anthropic `cache_control` breakpoints for `anthropic/*`
+models routed via OpenRouter — Claude is not silently excluded from caching
+here, contrary to a reasonable assumption. `cacheRetention: "none"` is set only
+for compaction/summary requests, so normal turns are cacheable by default.
+
+The caveat is that Anthropic bills cache *writes* at 1.25x input, breaking even
+at about two reads, so short sessions can pay a premium before saving anything.
+Providers with automatic caching (DeepSeek, OpenAI, Google, Z-AI, Moonshot,
+xAI) have no such write penalty to recover.
 
 `feynman alpha search` was also verified end-to-end against the persisted
 alphaXiv credential, returning real arXiv results. It uses no LLM tokens.
