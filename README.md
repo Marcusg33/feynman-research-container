@@ -32,8 +32,12 @@ Don't continue until Docker is installed and running.
 
 ### 2. Get the files
 
-Put this folder somewhere easy to find, like `Documents`. Then open a terminal
-**in that folder**:
+Download this project and put it somewhere easy to find, like `Documents`.
+
+**[How to download the files →](docs/getting-the-files.md)** (two minutes, no
+extra software needed)
+
+Then open a terminal **in that folder**:
 
 - **Windows:** open the folder, click the address bar, type `powershell`, Enter
 - **macOS:** right-click the folder → *Services* → *New Terminal at Folder*
@@ -60,13 +64,20 @@ Replace `sk-or-v1-replace-me` with your real key. Keep the
 
 Never share this file.
 
-### 5. Build and sign in
+### 5. Get the container and sign in
+
+```bash
+docker compose pull
+```
+
+This downloads a ready-made container. If it fails for any reason, build it
+yourself instead — slower, but always works:
 
 ```bash
 docker compose build
 ```
 
-Takes 2–5 minutes the first time. Then connect alphaXiv:
+Then connect alphaXiv:
 
 ```bash
 docker compose run --rm alphaxiv-login
@@ -140,6 +151,7 @@ repeated content is cached at a large discount.
 
 ## More
 
+- **[Getting the files](docs/getting-the-files.md)** — downloading a ZIP, or installing Git
 - **[Usage in depth](docs/usage.md)** — all workflows, running single commands
 - **[Models and costs](docs/models-and-costs.md)** — best value models, pricing
 - **[Configuration](docs/configuration.md)** — changing models, web search, versions

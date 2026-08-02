@@ -47,12 +47,37 @@ This is optional — the paper workflows do not need it.
 
 ## Updating
 
+Fetch the latest published container:
+
+```bash
+docker compose pull
+```
+
+Or rebuild it yourself using the versions pinned in `compose.yml`:
+
 ```bash
 docker compose build --no-cache
 ```
 
-Rebuilds using the versions pinned in `compose.yml`. Your settings, logins and
-`workspace` files are untouched.
+Either way your settings, logins and `workspace` files are untouched.
+
+### Prebuilt vs building it yourself
+
+The container is published to the GitHub Container Registry for both Intel and
+Apple Silicon:
+
+```
+ghcr.io/marcusg33/feynman-research-container:latest
+```
+
+`docker compose pull` fetches it — faster, and it cannot fail partway through a
+build. `docker compose build` builds locally and reuses the same tag, which is
+what you want if you have edited the `Dockerfile` or changed the pinned
+versions below.
+
+To pin to a specific published version rather than `latest`, change the
+`image:` line at the top of `compose.yml`, e.g.
+`ghcr.io/marcusg33/feynman-research-container:1.0`.
 
 ---
 

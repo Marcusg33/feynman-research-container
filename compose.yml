@@ -1,7 +1,10 @@
 # Shared bits between the main service and the one-off alphaXiv login service,
 # so the two can never drift out of sync on volumes or environment.
 x-common: &common
-  image: pi-feynman:local
+  # Prebuilt image published by GitHub Actions for amd64 and arm64.
+  # `docker compose pull` fetches it; `docker compose build` builds locally
+  # instead and reuses this same tag. Either works.
+  image: ghcr.io/marcusg33/feynman-research-container:latest
   environment: &common-env
     # Simplest auth path for a container: pass the key in directly.
     # Set this in a local .env file (not committed to git) or export it
